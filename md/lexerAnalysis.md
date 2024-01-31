@@ -117,7 +117,7 @@ $$
 
 自动机具有两大要素：**状态集** $S$ 以及**状态转移函数** $\delta$。
 
-<img src="./lexerAnalysis/image-20240131212248398.png" alt="image-20240131212248398" style="zoom:67%;" />
+<img src="lexerAnalysis/image-20240131212248398.png" alt="image-20240131212248398" style="zoom:67%;" />
 
 Q：如何定义一个自动机的表达能力或计算能力？
 
@@ -125,7 +125,7 @@ A：每个自动机 $\mathcal A$ 可以表示一个语言 $L(\mathcal A)$，通�
 
 我们希望通过若干的正则表达式 RE，最终得到一个词法分析器。
 
-<img src="./lexerAnalysis/image-20240131212504081.png" alt="image-20240131212504081" style="zoom:67%;" />
+<img src="lexerAnalysis/image-20240131212504081.png" alt="image-20240131212504081" style="zoom:67%;" />
 
 ### NFA
 
@@ -159,7 +159,7 @@ NFA 的非确定性：
 
 注意到 $\delta$ 是一个**函数**，意味着对于定义域中的每个元素，都应当有一个对应的映射，于是约定：**所有没有对应出边的字符都默认指向一个不存在的“空状态” $\varnothing$。**
 
-<img src="./lexerAnalysis/image-20240131215954935.png" alt="image-20240131215954935" style="zoom:67%;" />
+<img src="lexerAnalysis/image-20240131215954935.png" alt="image-20240131215954935" style="zoom:67%;" />
 
 对于上方的 NFA，可以给出如下的状态转换表：
 
