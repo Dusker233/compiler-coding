@@ -115,3 +115,65 @@ $$
 
 ## 自动机
 
+自动机具有两大要素：**状态集** $S$ 以及**状态转移函数** $\delta$。
+
+<img src="./lexerAnalysis/image-20240131212248398.png" alt="image-20240131212248398" style="zoom:67%;" />
+
+Q：如何定义一个自动机的表达能力或计算能力？
+
+A：每个自动机 $\mathcal A$ 可以表示一个语言 $L(\mathcal A)$，通过语言集合的大小来确定表达能力。
+
+我们希望通过若干的正则表达式 RE，最终得到一个词法分析器。
+
+<img src="./lexerAnalysis/image-20240131212504081.png" alt="image-20240131212504081" style="zoom:67%;" />
+
+### NFA
+
+非确定性有穷自动机（NFA）$\mathcal A$ 是一个五元组
+$$
+\mathcal A = (\Sigma, S, s_0, \delta, F)
+$$
+包含：
+
+- 字母表 $\Sigma$，其中 $\epsilon \notin \Sigma$；
+- **有穷**的状态集合 $S$；
+- **唯一**的初始状态 $s_0 \in S$；
+- 状态转移**函数** $\delta$，满足
+
+$$
+\delta:S \times (\Sigma \cup \{\epsilon\}) \to 2^S
+$$
+
+​	这表示当前处于某个状态，并找到了一个字母表中的字符或空串，接下来将转移到 $S$ 的幂集。
+
+​	$\delta(S, a)$ 表示从状态 $S$ 沿字母 $a$ 的边走向的状态，这些状态被称为**后继状态**。
+
+> $S$ 的幂集是 $S$ 的所有子集构成的集合。
+
+- 接受（结束/终止）状态集合 $F \subseteq S$，可以为空。
+
+NFA 的非确定性：
+
+- 状态转移不唯一：$\delta(S, a)$ 是一个集合；
+- 若存在 $\delta(S, \epsilon)$，则某个状态 $S$ 可以通过 $\delta(S, \epsilon)$ 自发地转移至另一个状态 $S'$。
+
+注意到 $\delta$ 是一个**函数**，意味着对于定义域中的每个元素，都应当有一个对应的映射，于是约定：**所有没有对应出边的字符都默认指向一个不存在的“空状态” $\varnothing$。**
+
+<img src="./lexerAnalysis/image-20240131215954935.png" alt="image-20240131215954935" style="zoom:67%;" />
+
+对于上方的 NFA，可以给出如下的状态转换表：
+
+| 状态 |      $a$      |      $b$      |  $\epsilon$   |
+| :--: | :-----------: | :-----------: | :-----------: |
+|  0   |    {0, 1}     |      {0}      | $\varnothing$ |
+|  1   | $\varnothing$ |      {2}      | $\varnothing$ |
+|  2   | $\varnothing$ |      {3}      | $\varnothing$ |
+|  3   | $\varnothing$ | $\varnothing$ | $\varnothing$ |
+
+NFA 可以**识别**（接受或拒绝） $\Sigma$ 上的字符串。
+
+（非确定性）有穷自动机 $\mathcal A$ **接受**字符串 $x$ 当且仅当**存在**一条从开始状态 $s_0$ 到**某个**接受状态 $f \in F$、标号（按顺序记录每条边上的字符）为 $x$ 的路径。
+
+因此，$\mathcal A$ 定义了一种**语言** $L(\mathcal A)$，为 $\mathcal A$ 能接受的所有字符串构成的集合。对于上方的 NFA，不难发现 $\text{aabb} \in L(\mathcal A)$，$\text{ababab} \notin L(\mathcal A)$。
+
+上方的 NFA 表达的语言 $L(\mathcal A) = L((a \mid b)^*abb)$，此时我们将 NFA 转化为了正则表达式。
