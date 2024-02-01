@@ -113,7 +113,7 @@ $$
 > \left\{(x)_2 \mid (x)_{10} \equiv 0 \pmod p\right\}
 > $$
 
-## 自动机
+### 自动机
 
 自动机具有两大要素：**状态集** $S$ 以及**状态转移函数** $\delta$。
 
@@ -127,7 +127,7 @@ A：每个自动机 $\mathcal A$ 可以表示一个语言 $L(\mathcal A)$，通�
 
 <img src="lexerAnalysis/image-20240131212504081.png" alt="image-20240131212504081" style="zoom:67%;" />
 
-### NFA
+#### NFA
 
 非确定性有穷自动机（NFA）$\mathcal A$ 是一个五元组
 $$
@@ -177,3 +177,73 @@ NFA 可以**识别**（接受或拒绝） $\Sigma$ 上的字符串。
 因此，$\mathcal A$ 定义了一种**语言** $L(\mathcal A)$，为 $\mathcal A$ 能接受的所有字符串构成的集合。对于上方的 NFA，不难发现 $\text{aabb} \in L(\mathcal A)$，$\text{ababab} \notin L(\mathcal A)$。
 
 上方的 NFA 表达的语言 $L(\mathcal A) = L((a \mid b)^*abb)$，此时我们将 NFA 转化为了正则表达式。
+
+对于一个自动机 $\mathcal A$，我们关心两个基本问题：
+
+- Membership：给定字符串 $x$，$x \in L(\mathcal A)$？
+- $L(\mathcal A)$ 究竟是什么？
+
+![image-20240201131400620](./lexerAnalysis/image-20240201131400620.png)
+
+上半部分对应的正则表达式为 $\left(1^* \mid 01^*0{\color{red}1^*}\right)^*$，下半部分对应的正则表达式为 $\left(0^* \mid 10^*10^*\right)^*$，即 $L(\mathcal A)$ 是包含偶数个 0 或偶数个 1 的 01 串。
+
+#### DFA
+
+确定性有穷自动机（DFA）和 NFA 唯一不同在于状态转移函数 $\delta$：
+$$
+\delta: S \times \Sigma \to S
+$$
+即，不能通过空串转移状态，对于每次转移，到达的状态都是唯一的。
+
+我们约定，所有没有对应出边的字符默认指向一个“死状态”，进入死状态后接受任何字符都会回到死状态。
+
+![image-20240201204131675](./lexerAnalysis/image-20240201204131675.png)
+
+对于这个 DFA，不难得到 $\text{aabb} \in L(\mathcal A)$，$\text{ababab} \notin L(\mathcal A)$。
+
+判断 $L(\mathcal A)$ 对应的正则表达式似乎成为了一件难事！这个 DFA 对应的 $L(\mathcal A) = L((a \mid b)^*abb)$。
+
+是否发现问题？这个 DFA 和上面的 NFA 表达了同一个 $L(\mathcal A)$！
+
+这表明：NFA 简便易于理解，便于描述语言 $L(\mathcal A)$；DFA 易于判断 $x \in L(\mathcal A)$，适合产生词法分析器。
+
+所以我们用 NFA 描述语言，用 DFA 实现词法分析器。即：$\text{RE} \Longrightarrow \text{NFA} \Longrightarrow \text{DFA} \Longrightarrow \text{词法分析器}$。
+
+### 从正则表达式到词法分析器
+
+#### RE $\to$ NFA
+
+我们用 $r$ 表示一个正则表达式，$N(r)$ 表示由 $r$ 构造的 NFA，我们要求 $L(r) = L(N(r))$，即二者表示的语言一致。
+
+构造方法为 Thompson 构造法，其基本思想为**按结构归纳**：
+
+1. $\epsilon$ 是正则表达式，构造为<img src="./lexerAnalysis/image-20240201205222712.png" alt="image-20240201205222712" style="zoom:50%;" />；
+2. $a \in \Sigma$ 是正则表达式，构造为 <img src="./lexerAnalysis/image-20240201205612453.png" alt="image-20240201205612453" style="zoom:50%;" />；
+3. 如果 $s$ 是正则表达式，则 $(s)$ 是正则表达式，无需再次构造，$N((s)) = N(s)$；
+4. 如果 $s$，$t$ 是正则表达式，则 $s|t$ 是正则表达式，构造为 <img src="./lexerAnalysis/image-20240201210048061.png" alt="image-20240201210048061" style="zoom:33%;" />；
+
+​	Q：如果 NFA 的开始状态和接受状态不唯一怎么办？
+
+​	A：由于 $N(s)$ 和 $N(t)$ 也是通过如此的构造方法得到的，只要每一步的开始状态和接受状态都是唯一的，则根据**归纳假设**，其开始状态和接受状态必然是唯一的。
+
+5. 如果 $s$，$t$ 是正则表达式，则 $st$ 是正则表达式，构造为 <img src="./lexerAnalysis/image-20240201211434827.png" alt="image-20240201211434827" style="zoom:50%;" />；
+5. 如果 $s$ 是正则表达式，则 $s^*$ 是正则表达式，构造为 <img src="./lexerAnalysis/image-20240201211931047.png" alt="image-20240201211931047" style="zoom:33%;" />。
+
+这样构造出来的 NFA $N(r)$ 有如下的性质：
+
+1. 开始状态和接受状态均**唯一**；
+2. 开始状态没有入边，接受状态没有出边；
+3. $N(r)$ 的**状态数** $|S| \leq 2 \times |r|$，其中 $|r|$ 表示 $r$ 中运算符和运算分量的总和。证明显而易见，由于每一步最多加一个开始状态和接受状态，共构造 $|r|$ 步；
+4. 每个状态最多有两个 $\epsilon$-入边和两个 $\epsilon$-出边；
+5. $\forall a \in \Sigma$，每个状态最多有一个 $a$-入边和一个 $a$-出边。
+
+> <img src="./lexerAnalysis/image-20240201213354482.png" alt="image-20240201213354482" style="zoom:67%;" />
+>
+> 构造顺序为 $a$，$b$，$a|b$，$(a|b)^*$，$(a|b)^*abb$。
+
+#### NFA $\to$ DFA
+
+我们用 $N$ 表示一个 NFA，$D$ 表示一个 DFA，我们要求 $L(N)=L(D)$。
+
+我们用**子集构造法**来完成 $N \to D$ 的任务，思路为**用 DFA 模拟 NFA**。
+
