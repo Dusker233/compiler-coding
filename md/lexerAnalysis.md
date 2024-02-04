@@ -247,3 +247,61 @@ $$
 
 我们用**子集构造法**来完成 $N \to D$ 的任务，思路为**用 DFA 模拟 NFA**。
 
+例：将下面的 NFA 转为 DFA。
+
+<img src="./lexerAnalysis/image-20240204201125821.png" alt="image-20240204201125821" style="zoom:50%;" />
+
+- 首先取出所有的初始状态（包括可以通过 $\epsilon$ 转移到的状态）：$\{0, 1, 2, 4, 7\}$，由于这些状态无法被区分，把它们整体当作 DFA 中的一个状态；
+- 再看位于初始状态时会转移到什么状态：枚举初始状态集合中的每个状态，再枚举每条转移边：
+    - 初始状态通过 $a$ 可以转移到 $\{3, 8, {\color{red}6, 7, 1, 2, 4}\}$，其中标红的是通过 $\epsilon$ 继续转移出来的状态，把它们作为 DFA 中的一个状态；
+    - 通过 $b$ 可以转移到 $\{5, {\color{red}6, 7, 1, 2, 4}\}$，把它们作为 DFA 中的一个状态。
+- 不断重复上面的操作，直到转化的状态集合中包含接受状态，此时就确定了 DFA 的一个接受状态。
+
+转化的 DFA 如下：
+
+<img src="./lexerAnalysis/image-20240204211217632.png" alt="image-20240204211217632" style="zoom:50%;" />
+
+<img src="./lexerAnalysis/image-20240204211229981.png" alt="image-20240204211229981" style="zoom:50%;" />
+
+对于状态 $s$，把只通过 $\epsilon$ 转移可达的状态集合称为 $\epsilon-\text{closure}$，即：
+$$
+\epsilon-\text{closure}(s) = \{t \in S_N \mid s \overset{\epsilon^*}{\to} t\}
+$$
+对于一个状态集合 $T$，其 $\epsilon-\text{closure}$ 为
+$$
+\epsilon-\text{closure}(T) = \bigcup_{s \in T} \epsilon-\text{closure}(s)
+$$
+则 DFA 上的一次状态转移
+$$
+\text{move}(T, a) = \bigcup_{s \in T} \delta(s, a)
+$$
+子集构造法就是把一个 $N:(\Sigma_N, S_N, n_0, \delta_N, F_N)$ 转化为一个 $D:(\Sigma_D, S_D, d_0, \delta_D, F_D)$，满足：
+$$
+\begin{aligned}
+\Sigma_D &= \Sigma_N \\
+S_D &\subseteq 2^{S_N}\quad (\forall s_D \in S_D \to s_D \subseteq S_N) \\
+d_0 &= \epsilon-\text{closure}(n_0) \\
+\forall a \in \Sigma_D : \delta_D(s_D, a) &= \epsilon-\text{closure}\left(\text{move}(s_D, a)\right) \\
+F_D &= \left\{s_D  \in S_D \mid \exists f \in F_N \and f \in s_D\right\}
+\end{aligned}
+$$
+设 $|S_N| = n$，则 $|S_D| = \mathcal O(2^n)$，最坏情况下 $|S_D| = \Theta(2^n)$。
+
+> 例：构造“长度为 $m \geq n$ 个字符的仅包含 $a$ 和 $b$ 的字符串，且倒数第 $n$ 个字符为 $a$”的 DFA。
+>
+> 容易写出 NFA 对应的语言：$L_n = (a|b)*a(a|b)^{n-1}$，并构造出 NFA：
+>
+> <img src="./lexerAnalysis/image-20240204225307960.png" alt="image-20240204225307960" style="zoom:50%;" />
+>
+> 下令 $n=4$，便可得到一个确定的 NFA。如果对这个 NFA 用子集构造法构造 DFA，可得：
+>
+> <img src="./lexerAnalysis/image-20240204232056194.png" alt="image-20240204232056194" style="zoom:50%;" />
+>
+> 可以证明，这个 DFA 无法再被化简。
+
+对于闭包 $f-\text{closure}$，我们对集合 $T$ 不断求闭包，实际上是在做 $T \to f(T) \to f(f(T)) \to \cdots$ 的操作，直到找到 $f$ 的不动点（$f(x)=x$），即 $T$ 不再变大。
+
+#### DFA 最小化
+
+
+
