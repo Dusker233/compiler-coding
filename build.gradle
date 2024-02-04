@@ -7,7 +7,10 @@ group 'org.example'
 version '1.0-SNAPSHOT'
 
 repositories {
+    mavenLocal()
+    maven { url 'https://maven.aliyun.com/repository/public/' }
     mavenCentral()
+    maven { url 'https://maven.aliyun.com/repository/gradle-plugin' }
 }
 
 dependencies {
