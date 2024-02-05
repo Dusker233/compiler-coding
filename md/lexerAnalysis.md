@@ -31,8 +31,8 @@ $$
 
 > 例如：
 >
-> - $L$ 和 $M$ 的并：$L \cup M = \left\{s \mid s \in L \or s \in M\right\}$；
-> - $L$ 和 $M$ 的连接：$LM = \left\{xy \mid x \in L \and y \in M\right\}$；
+> - $L$ 和 $M$ 的并：$L \cup M = \left\{s \mid s \in L \vee s \in M\right\}$；
+> - $L$ 和 $M$ 的连接：$LM = \left\{xy \mid x \in L \wedge y \in M\right\}$；
 > - $L$ 的幂：$L^i = \left\{s_1s_2\dots s_i \mid s_i \in L\right\}$，即 $L$ 中的任意元素连接 $i$ 次；
 > - $L$ 的 Kleene 闭包：$L^* = \bigcup_{i=0}^\infty L^i$；
 > - $L$ 的正闭包：$L^+ = \bigcup_{i=1}^\infty L^i$。
@@ -282,7 +282,7 @@ $$
 S_D &\subseteq 2^{S_N}\quad (\forall s_D \in S_D \to s_D \subseteq S_N) \\
 d_0 &= \epsilon-\text{closure}(n_0) \\
 \forall a \in \Sigma_D : \delta_D(s_D, a) &= \epsilon-\text{closure}\left(\text{move}(s_D, a)\right) \\
-F_D &= \left\{s_D  \in S_D \mid \exists f \in F_N \and f \in s_D\right\}
+F_D &= \left\{s_D  \in S_D \mid \exists f \in F_N \wedge f \in s_D\right\}
 \end{aligned}
 $$
 设 $|S_N| = n$，则 $|S_D| = \mathcal O(2^n)$，最坏情况下 $|S_D| = \Theta(2^n)$。
@@ -303,5 +303,31 @@ $$
 
 #### DFA 最小化
 
+DFA 最小化算法的基本思想是**等价的状态可以合并**。
+
+如何定义**等价**？非常自然地，我们认为两个状态等价，就是它们的行为是等价的，它们经过相同的转移会到达相同的状态：
+$$
+s \sim t \Longleftrightarrow \forall a \in \Sigma \left((s \overset{a}{\to} s') \wedge (t \overset{a}{\to} t')\right) \Longrightarrow s' = t'
+$$
+事实上这种定义是不对的：
+
+<img src="./lexerAnalysis/image-20240205215428213.png" alt="image-20240205215428213" style="zoom:60%;" />
+
+例如，$A$ 和 $E$ 都能通过 $b$ 转移到 $C$，都能通过 $a$ 转移到 $B$，但接受状态和非接受状态必然不等价！
+
+<img src="./lexerAnalysis/image-20240205215922568.png" alt="image-20240205215922568" style="zoom:50%;" />
+
+又如，按照上面的定义，可以判断 $a \not\sim b$，但实际上 $a \sim b$。
+
+注意到上面的定义中，**相同的**状态过于严苛，只需要让它们都到达**等价的**状态：
+$$
+s \sim t \Longleftrightarrow \forall a \in \Sigma \left((s \overset{a}{\to} s') \wedge (t \overset{a}{\to} t')\right) \Longrightarrow s' \sim t'
+$$
+此时变成了一个递归定义，入口在哪？
+
+正难则反！如果两个状态不等价，则有：
+$$
+s \not\sim t \Longleftrightarrow \exists a \in \Sigma\ (s \overset{a}{\to} s') \wedge (t \overset{a}{\to} t') \wedge (s' \not\sim t')
+$$
 
 
