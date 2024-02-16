@@ -88,4 +88,6 @@ exit /b %EXIT_CODE%
 :mainEnd
 if "%OS%"=="Windows_NT" endlocal
 
+set DEFAULT_JVM_OPTS="-Dfile.encoding=UTF-8"
+
 :omega

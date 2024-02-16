@@ -25,27 +25,50 @@ formalParameter: type ID ;
 
 block: '{' stat* '}' ;
 
-stat: block // 语句嵌套
-    | varDecl
-    | 'if' expr 'then' stat ('else' stat)?
-    | 'return' expr? ';'
-    | expr '=' expr ';'
-    | expr ';'
+stat : block    # BlockStat
+     | varDecl  # VarDeclStat
+     | 'if' expr 'then' stat ('else' stat)? # IfStat
+     | 'return' expr? ';'   # ReturnStat
+     | expr '=' expr ';'    # AssignStat
+     | expr ';'             # ExprStat
+     ;
+
+
+
+expr: ID '(' exprList? ')'    # Call // function call
+    | expr '[' expr ']'       # Index // array subscripts
+    | op = '-' expr           # Negate // right association
+    | op = '!' expr           # Not // right association
+    | <assoc = right> lhs = expr '^' rhs = expr # Power
+    | lhs = expr (op = '*' | op = '/') rhs = expr     # MultDiv // 这样 ANTLR 会生成一个成员类，其中有一个变量为 op
+    | lhs = expr (op = '+' | op = '-') rhs = expr     # AddSub
+    | lhs = expr (op = '==' | op = '!=') rhs = expr   # EQNE
+    | '(' expr ')'            # Parens
+    | ID                      # Id
+    | INT                     # Int
     ;
 
-expr: ID '(' exprList? ')' // function call
-    | expr '[' expr ']' // array subscript
-    // 高维数组时展开前面的 expr，从后依次到前构造
-    | '-' expr
-    | '!' expr
-    | <assoc = right> expr '^' expr
-    | expr ('*' | '/') expr
-    | expr ('+' | '-') expr
-    | expr ('==' | '!=') expr
-    | '(' expr ')'
-    | ID
-    | INT
-    ;
+//stat: block // 语句嵌套
+//    | varDecl
+//    | 'if' expr 'then' stat ('else' stat)?
+//    | 'return' expr? ';'
+//    | expr '=' expr ';'
+//    | expr ';'
+//    ;
+//
+//expr: ID '(' exprList? ')' #FunctionCall // function call
+//    | expr '[' expr ']' // array subscript
+//    // 高维数组时展开前面的 expr，从后依次到前构造
+//    | '-' expr
+//    | '!' expr
+//    | <assoc = right> lhs = expr '^' rhs = expr
+//    | lhs = expr (op = '*' | op = '/') rhs = expr
+//    | lhs = expr (op = '+' | op = '-') rhs = expr
+//    | lhs = expr (op = '==' | op = '!=') rhs = expr
+//    | '(' expr ')'
+//    | ID
+//    | INT
+//    ;
 
 exprList: expr (',' expr)* ;
 

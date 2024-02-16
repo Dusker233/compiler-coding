@@ -23,8 +23,13 @@ dependencies {
 
 generateGrammarSource {
     arguments += ["-Xlog", "-visitor"]
+    arguments << "-lib" << "src/main/antlr/simpleExpr"
 }
 
 test {
     useJUnitPlatform()
+}
+
+javadoc {
+    options.encoding = 'UTF-8'
 }
